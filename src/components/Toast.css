@@ -1,0 +1,10 @@
+.app-toast { position: fixed; z-index: 1200; top: 18px; right: 20px; display: flex; align-items: center; gap: 11px; width: min(430px, calc(100vw - 32px)); padding: 14px 14px; border: 1px solid #bbf7d0; border-radius: 12px; background: #fff; color: #166534; box-shadow: 0 12px 36px #10271826; animation: toast-in .2s ease-out; }
+.app-toast span { flex: 1; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.app-toast button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 8px; color: inherit; background: transparent; }
+.app-toast button:hover { background: #f0fdf4; }
+.app-toast-error { border-color: #fecaca; color: #991b1b; }
+.app-toast-success { border-color: #bbf7d0; color: #166534; }
+:root[data-theme='dark'] .app-toast { background: #111a14; border-color: #334a39; color: #d7f0dc; }
+:root[data-theme='dark'] .app-toast-error { border-color: #7f1d1d; color: #fecaca; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 560px) { .app-toast { top: 10px; right: 10px; width: calc(100vw - 20px); } }

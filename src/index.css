@@ -1,0 +1,178 @@
+
+/* Mzuzu SmartClean: Green and White Theme */
+
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #166534;
+  background: #ffffff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --primary-green: #16803c;
+  --dark-green: #166534;
+  --light-green: #f0fdf4;
+  --white: #ffffff;
+  --border-green: #bbf7d0;
+  --text-dark: #1f2937;
+  --text-muted: #6b7280;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--white);
+  color: var(--text-dark);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: var(--primary-green);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--dark-green);
+}
+/* Dark theme is activated by ThemeContext on the document root. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --white: #111a14;
+  --text-dark: #e5eee7;
+  --text-muted: #a3b2a7;
+  --light-green: #1b3022;
+  --border-green: #334a39;
+}
+
+:root[data-theme='dark'] body,
+:root[data-theme='dark'] .admin-layout,
+:root[data-theme='dark'] .citizen-page {
+  background: #0b120d;
+  color: #e5eee7;
+}
+
+:root[data-theme='dark'] .admin-sidebar,
+:root[data-theme='dark'] .admin-topbar,
+:root[data-theme='dark'] .admin-footer,
+:root[data-theme='dark'] .dashboard-placeholder,
+:root[data-theme='dark'] .citizen-header,
+:root[data-theme='dark'] .citizen-footer,
+:root[data-theme='dark'] .citizen-info-card,
+:root[data-theme='dark'] .citizen-form-card,
+:root[data-theme='dark'] .citizen-reports-section,
+:root[data-theme='dark'] .citizen-side-note,
+:root[data-theme='dark'] .citizen-report-item {
+  background: #111a14;
+  border-color: #293b2e;
+}
+
+:root[data-theme='dark'] .admin-layout h1,
+:root[data-theme='dark'] .admin-layout h2,
+:root[data-theme='dark'] .admin-layout h3,
+:root[data-theme='dark'] .admin-identity-text strong,
+:root[data-theme='dark'] .sidebar-brand-text h2,
+:root[data-theme='dark'] .sidebar-link,
+:root[data-theme='dark'] .sidebar-link-active,
+:root[data-theme='dark'] .dashboard-placeholder strong,
+:root[data-theme='dark'] .placeholder-status-list > div,
+:root[data-theme='dark'] .citizen-page h2,
+:root[data-theme='dark'] .citizen-page h3,
+:root[data-theme='dark'] .citizen-brand,
+:root[data-theme='dark'] .citizen-form-card label,
+:root[data-theme='dark'] .citizen-report-item h3 {
+  color: #d7f0dc;
+}
+
+:root[data-theme='dark'] .admin-layout p,
+:root[data-theme='dark'] .admin-layout span,
+:root[data-theme='dark'] .citizen-page p,
+:root[data-theme='dark'] .citizen-page small,
+:root[data-theme='dark'] .citizen-brand small {
+  color: #a3b2a7;
+}
+
+:root[data-theme='dark'] .sidebar-link-active,
+:root[data-theme='dark'] .sidebar-link:hover,
+:root[data-theme='dark'] .sidebar-environment,
+:root[data-theme='dark'] .dashboard-notice,
+:root[data-theme='dark'] .dashboard-date,
+:root[data-theme='dark'] .citizen-location-button,
+:root[data-theme='dark'] .citizen-message,
+:root[data-theme='dark'] .citizen-empty-state {
+  background: #1b3022;
+  border-color: #334a39;
+  color: #d7f0dc;
+}
+
+:root[data-theme='dark'] .citizen-page input,
+:root[data-theme='dark'] .citizen-page select,
+:root[data-theme='dark'] .citizen-page textarea,
+:root[data-theme='dark'] .notification-button,
+:root[data-theme='dark'] .theme-toggle {
+  background: #17231a;
+  border-color: #405344;
+  color: #e5eee7;
+}
+
+:root[data-theme='dark'] .citizen-side-card {
+  background: linear-gradient(160deg, #1b3022, #111a14);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 11px;
+  border: 1px solid #e2ebe4;
+  border-radius: 9px;
+  background: #fff;
+  color: #374151;
+  font-size: 12px;
+}
+
+:root[data-theme='dark'] .theme-toggle {
+  border-color: #405344;
+}
+
+:root[data-theme='dark'] .summary-card,
+:root[data-theme='dark'] .admin-page-content > section {
+  background: #111a14 !important;
+  border-color: #293b2e !important;
+  color: #e5eee7 !important;
+}
+
+:root[data-theme='dark'] .admin-page-content > section > div[style] {
+  background: #1b3022 !important;
+}
+
+:root[data-theme='dark'] .admin-page-content > section h1,
+:root[data-theme='dark'] .admin-page-content > section h2,
+:root[data-theme='dark'] .admin-page-content > section h3,
+:root[data-theme='dark'] .admin-page-content > section p {
+  color: #d7f0dc !important;
+}
+
+:root[data-theme='dark'] .summary-card-title,
+:root[data-theme='dark'] .summary-card-description {
+  color: #a3b2a7;
+}
+
+:root[data-theme='dark'] .summary-card-value {
+  color: #d7f0dc;
+}

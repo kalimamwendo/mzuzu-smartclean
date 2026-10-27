@@ -1,0 +1,21 @@
+﻿.admin-reports-page { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; }
+.admin-reports-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.admin-reports-heading h1 { margin: 0; color: #14532d; }
+.admin-reports-heading p { color: #6b7280; }
+.admin-reports-heading > span { color: #166534; background: #f0fdf4; border-radius: 20px; padding: 8px 12px; white-space: nowrap; }
+.admin-reports-error { color: #b91c1c; background: #fef2f2; padding: 12px; border-radius: 9px; }
+.admin-reports-empty { text-align: center; padding: 55px 15px; color: #6b7280; }
+.admin-reports-empty svg { color: #15803d; }
+.admin-reports-empty h2 { color: #166534; }
+.admin-reports-table-wrap { overflow-x: auto; }
+.admin-reports-table { width: 100%; border-collapse: collapse; min-width: 780px; }
+.admin-reports-table th, .admin-reports-table td { text-align: left; vertical-align: top; padding: 13px 11px; border-bottom: 1px solid #e5e7eb; font-size: 13px; line-height: 1.55; }
+.admin-reports-table th { color: #4b5563; background: #f9fafb; }
+.admin-reports-table td strong { color: #14532d; }
+.admin-reports-table select { max-width: 160px; text-transform: capitalize; padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; background: white; }
+:root[data-theme='dark'] .admin-reports-page { background: #111827; border-color: #374151; }
+:root[data-theme='dark'] .admin-reports-heading h1, :root[data-theme='dark'] .admin-reports-table td strong, :root[data-theme='dark'] .admin-reports-empty h2 { color: #86efac; }
+:root[data-theme='dark'] .admin-reports-heading p, :root[data-theme='dark'] .admin-reports-empty { color: #9ca3af; }
+:root[data-theme='dark'] .admin-reports-table th { background: #1f2937; color: #d1d5db; }
+:root[data-theme='dark'] .admin-reports-table td, :root[data-theme='dark'] .admin-reports-table th { border-color: #374151; }
+:root[data-theme='dark'] .admin-reports-table select { color: #f9fafb; background: #1f2937; border-color: #4b5563; }
