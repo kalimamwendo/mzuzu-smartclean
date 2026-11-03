@@ -7,7 +7,7 @@ export async function apiRequest(path, { token, ...options } = {}) {
       ...options,
       headers: {
         ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(token ? { Authorization: 'Bearer ' + token } : {}),
         ...options.headers,
       },
     })

@@ -1,6 +1,6 @@
 # Mzuzu SmartClean
 
-Mzuzu SmartClean is a responsive waste-reporting application for residents and city teams in Mzuzu, Malawi. The existing React/Vite frontend is being connected incrementally to a FastAPI backend with a local SQLite development database; PostgreSQL/PostGIS is the target for spatial analysis. Spatial boundary validation and DBSCAN analysis are planned for later stages; no boundary or analysis results are currently fabricated.
+Mzuzu SmartClean is a responsive waste-reporting application for residents and city teams in Mzuzu, Malawi. The existing React/Vite frontend is being connected incrementally to a FastAPI backend with a local SQLite development database; PostgreSQL/PostGIS is the target for spatial analysis. Detailed architectural and operational documentation is available in [SYSTEM_DOCUMENTATION.md](SYSTEM_DOCUMENTATION.md) and [Mzuzu_SmartClean_System_Documentation.docx](Mzuzu_SmartClean_System_Documentation.docx).
 
 ## Current implementation
 
@@ -55,6 +55,7 @@ Open API documentation at `http://127.0.0.1:8000/docs`. The Vite frontend runs o
 - `GET /api/v1/auth/me` -- returns the authenticated account.
 - `GET /api/v1/admin/reports` -- administrator-only paginated report list, with optional status/category filters.
 - `PATCH /api/v1/admin/reports/{report_id}/status` -- administrator-only status change with history recording.
+- `GET /api/v1/admin/analytics` -- administrator-only DBSCAN hotspot clusters, report points, category counts, and summary metrics.
 - `GET /api/v1/health` — process liveness; does not require a database connection.
 - `GET /api/v1/health/ready` — verifies the configured database connection.
 - `GET /api/v1/categories` — returns active categories.
