@@ -13,9 +13,10 @@ app = FastAPI(title=settings.app_name, version="0.1.0", description="Waste repor
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 app.include_router(api_router)
 
