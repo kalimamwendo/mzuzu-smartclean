@@ -20,6 +20,17 @@ app.add_middleware(
 app.include_router(api_router)
 
 
+@app.get("/", tags=["root"])
+def root():
+    return {
+        "app": settings.app_name,
+        "status": "online",
+        "documentation": "/docs",
+        "health": "/api/v1/health",
+        "ready": "/api/v1/health/ready",
+    }
+
+
 UPLOAD_DIR = Path(__file__).resolve().parents[1] / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
