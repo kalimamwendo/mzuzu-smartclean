@@ -29,8 +29,8 @@ export default function LandingPage() {
   async function handleSignIn(event) {
     event.preventDefault()
     const result = await signIn({ email, password })
-    if (result.error) {
-      setError(result.error)
+    if (result.error || !result.user) {
+      setError(result.error || 'Sign in failed. Could not retrieve user profile.')
       return
     }
     navigate(result.user.role === 'admin' ? '/admin' : '/citizen')
@@ -39,8 +39,8 @@ export default function LandingPage() {
   async function handleSignUp(event) {
     event.preventDefault()
     const result = await signUp({ name, email, password })
-    if (result.error) {
-      setError(result.error)
+    if (result.error || !result.user) {
+      setError(result.error || 'Sign up failed. Could not retrieve user profile.')
       return
     }
     navigate('/citizen')

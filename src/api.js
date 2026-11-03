@@ -1,7 +1,19 @@
 function resolveApiBaseUrl() {
   if (typeof window !== 'undefined') {
+    try {
+      const urlParams = new URLSearchParams(window.location.search)
+      const queryApi = urlParams.get('api')
+      if (queryApi && queryApi.trim()) {
+        const cleaned = queryApi.trim().replace(/\/+$/, '')
+        const full = cleaned.endsWith('/api/v1') ? cleaned : `${cleaned}/api/v1`
+        window.localStorage.setItem('smartclean_api_url', full)
+        return full
+      }
+    } catch {
+      // Ignore URL parsing errors
+    }
     const custom = window.localStorage.getItem('smartclean_api_url')
-    if (custom) return custom.replace(/\/+$/, '')
+    if (custom && custom.trim()) return custom.trim().replace(/\/+$/, '')
   }
 
   const envUrl = import.meta.env.VITE_API_URL
@@ -34,13 +46,23 @@ export async function apiRequest(path, { token, ...options } = {}) {
       },
     })
   } catch {
-    throw new Error(`SmartClean API is unavailable at ${API_BASE_URL}. Start the FastAPI server or verify your backend service URL on Render, then try again.`)
+    throw new Error(`SmartClean API is unavailable at ${API_BASE_URL}. Ensure your Render backend service is awake and running.`)
+  }
+
+  const contentType = response.headers.get('content-type') || ''
+  const isJson = contentType.includes('application/json')
+  
+  if (response.status !== 204 && !isJson) {
+    throw new Error(`Invalid response from ${API_BASE_URL}. The request reached a static HTML page instead of the backend API. Please configure VITE_API_URL in Render to your backend URL.`)
   }
 
   const payload = response.status === 204 ? null : await response.json().catch(() => null)
   if (!response.ok) {
     const detail = payload?.detail
     throw new Error(typeof detail === 'string' ? detail : 'The request could not be completed.')
+  }
+  if (response.status !== 204 && payload === null) {
+    throw new Error(`The API at ${API_BASE_URL} returned an empty or unparseable response.`)
   }
   return payload
 }

@@ -47,6 +47,9 @@ export function AuthProvider({ children }) {
   }, [session.token])
 
   function establishSession(result) {
+    if (!result || !result.user) {
+      throw new Error('Authentication failed: The server response did not include user details. Please verify that the backend API URL is configured correctly.')
+    }
     const user = {
       id: result.user.id,
       name: result.user.display_name,
