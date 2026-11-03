@@ -29,12 +29,11 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 def initialize_local_database():
     if SessionLocal is None or engine is None:
         return
-    if engine.dialect.name == "sqlite":
-        Base.metadata.create_all(bind=engine)
-        from scripts.seed_categories import seed_categories
+    Base.metadata.create_all(bind=engine)
+    from scripts.seed_categories import seed_categories
 
-        seed_categories()
-        if settings.seed_default_accounts:
-            from scripts.seed_demo_accounts import seed_default_accounts
+    seed_categories()
+    if settings.seed_default_accounts:
+        from scripts.seed_demo_accounts import seed_default_accounts
 
-            seed_default_accounts()
+        seed_default_accounts()
