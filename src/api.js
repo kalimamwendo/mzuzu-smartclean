@@ -22,10 +22,18 @@ function resolveApiBaseUrl() {
     return trimmed.endsWith('/api/v1') ? trimmed : `${trimmed}/api/v1`
   }
 
-  // Automatic Render fallback: when loaded from a .onrender.com domain, target the companion API service
+  // Automatic Render fallback: when loaded from a .onrender.com domain, probe the known backend service.
+  // The companion service is mzuzu-smartclean-3 regardless of this frontend's numeric suffix.
   if (typeof window !== 'undefined' && window.location.hostname.endsWith('.onrender.com')) {
-    const renderApiOrigin = window.location.origin.replace('-frontend', '-api')
-    return `${renderApiOrigin}/api/v1`
+    // Try named-pattern replacement first (works if services follow *-frontend / *-api convention)
+    const byName = window.location.origin.replace(/-frontend(\b|$)/, '-api')
+    if (byName !== window.location.origin) return `${byName}/api/v1`
+    // Fallback: replace the numeric suffix with the known backend service name
+    const knownBackend = window.location.origin.replace(
+      /mzuzu-smartclean-\d+/,
+      'mzuzu-smartclean-3'
+    )
+    return `${knownBackend}/api/v1`
   }
 
   const fallback = (envUrl || 'http://127.0.0.1:8000/api/v1').replace(/\/+$/, '')
