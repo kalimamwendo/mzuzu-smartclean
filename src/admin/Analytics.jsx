@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Fragment } from 'react'
-import { Circle, CircleMarker, GeoJSON, MapContainer, Popup, TileLayer, Tooltip, useMap } from 'react-leaflet'
+import { CircleMarker, MapContainer, Popup, TileLayer, Tooltip, useMap } from 'react-leaflet'
 import { BarChart3, MapPinned, Radio, TrendingUp } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Scatter, ScatterChart, Tooltip as ChartTooltip, XAxis, YAxis } from 'recharts'
 import { useAuth } from '../AuthContext'
@@ -11,26 +11,28 @@ import './Analytics.css'
 const DEFAULT_CENTER = [-11.465, 34.02]
 const CHART_COLORS = ['#15803d', '#22c55e', '#86efac', '#166534', '#4ade80', '#bbf7d0']
 
-function MapViewControls({ boundary, center }) {
+function MapViewControls({ center, points }) {
   const map = useMap()
-  function fitCity() {
-    const coordinates = boundary?.features?.flatMap((feature) => {
-      const pairs = []
-      function collect(value) {
-        if (Array.isArray(value) && typeof value[0] === 'number' && typeof value[1] === 'number') pairs.push([value[1], value[0]])
-        else if (Array.isArray(value)) value.forEach(collect)
-      }
-      collect(feature.geometry.coordinates)
-      return pairs
-    }) || []
-    const bounds = coordinates.length ? coordinates : null
-    if (bounds) map.fitBounds(bounds)
+  useEffect(() => {
+    if (points.length > 1) map.fitBounds(points.map((point) => [point.latitude, point.longitude]), { padding: [35, 35] })
+    else if (points.length === 1) map.setView([points[0].latitude, points[0].longitude], 15)
     else map.setView(center, 13)
+  }, [center, map, points])
+
+  function fitReports() {
+    if (points.length > 1) map.fitBounds(points.map((point) => [point.latitude, point.longitude]), { padding: [35, 35] })
+    else map.setView(points.length === 1 ? [points[0].latitude, points[0].longitude] : center, points.length === 1 ? 15 : 13)
   }
   return <div className="analytics-map-controls">
-    <button type="button" onClick={fitCity}>Fit Mzuzu</button>
-    <button type="button" onClick={() => map.setView(center, 13)}>Reset view</button>
+    <button type="button" onClick={fitReports}>Fit all reports</button>
   </div>
+}
+
+function getMapPoints(points) {
+  return points
+    .filter((point) => Number.isFinite(point.latitude) && Number.isFinite(point.longitude)
+      && point.latitude >= -90 && point.latitude <= 90
+      && point.longitude >= -180 && point.longitude <= 180)
 }
 
 function SummaryCard({ icon: Icon, label, value, detail }) {
@@ -44,9 +46,10 @@ export default function Analytics() {
   const { token } = useAuth()
   const [analytics, setAnalytics] = useState(null)
   const [error, setError] = useState('')
-  const [boundary, setBoundary] = useState(null)
-  const [visibleLayers, setVisibleLayers] = useState({ boundary: true, reports: true, hotspots: true, noise: true })
+  const [visibleLayers, setVisibleLayers] = useState({ reports: true, hotspots: true, noise: true })
   const [mapExpanded, setMapExpanded] = useState(false)
+  const [analysisStatus, setAnalysisStatus] = useState('')
+  const [analysisRunning, setAnalysisRunning] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -60,21 +63,26 @@ export default function Analytics() {
     return () => { active = false; window.clearTimeout(timeout) }
   }, [token])
 
-  useEffect(() => {
-    const boundaryUrl = 'https://services.arcgis.com/uHAHKfH1Z5ye1Oe0/ArcGIS/rest/services/Malawi_REDD_paper_data/FeatureServer/0/query?where=ADM2_EN%20LIKE%20%27%25Mzuzu%25%27&outFields=ADM2_EN,ADM2_PCODE&returnGeometry=true&outSR=4326&f=geojson'
-    fetch(boundaryUrl)
-      .then((response) => {
-        if (!response.ok) throw new Error('Mzuzu boundary could not be loaded.')
-        return response.json()
-      })
-      .then((geojson) => setBoundary(geojson))
-      .catch(() => setBoundary(null))
-  }, [])
+  async function runConfiguredAnalysis() {
+    setAnalysisRunning(true)
+    setAnalysisStatus('')
+    try {
+      await apiRequest('/admin/spatial/runs', { token, method: 'POST', body: JSON.stringify({ mode: 'all', eps_metres: 100, min_samples: 3 }) })
+      setAnalysisStatus('Analysis completed with the configured 100 m / 3 sample model. Refreshing results...')
+      const result = await apiRequest('/admin/analytics', { token })
+      setAnalytics(result)
+    } catch (requestError) {
+      setAnalysisStatus(requestError.message)
+    } finally {
+      setAnalysisRunning(false)
+    }
+  }
 
   const mapCenter = useMemo(() => {
-    const point = analytics?.points?.[0]
+    const point = analytics?.points?.find((candidate) => Number.isFinite(candidate.latitude) && Number.isFinite(candidate.longitude))
     return point ? [point.latitude, point.longitude] : DEFAULT_CENTER
   }, [analytics])
+  const mapPoints = useMemo(() => getMapPoints(analytics?.points || []), [analytics])
   const categoryData = useMemo(() => Object.entries(analytics?.category_counts || {}).map(([name, count]) => ({ name, count })), [analytics])
   const hotspotData = useMemo(() => (analytics?.hotspots || []).map((hotspot) => ({ name: `Hotspot ${hotspot.cluster + 1}`, reports: hotspot.number_of_reports })), [analytics])
   const heatmapData = useMemo(() => {
@@ -84,10 +92,12 @@ export default function Analytics() {
 
   return <section className="analytics-page">
     <div className="analytics-heading">
-      <div><p className="analytics-eyebrow">DATA INSIGHTS</p><h1>Analytics & Hotspots</h1><p>Live DBSCAN analysis of citizen waste reports in Mzuzu City.</p></div>
-      <span className="analytics-method">DBSCAN · 200 m · 3 reports</span>
+      <div><p className="analytics-eyebrow">DATA INSIGHTS</p><h1>Analytics & Hotspots</h1><p>Live DBSCAN analysis of independent citizen waste-report coordinates.</p></div>
+      <button type="button" className="analytics-map-expand" onClick={runConfiguredAnalysis} disabled={analysisRunning}>{analysisRunning ? 'Running...' : 'Run 100 m analysis'}</button>
+      <span className="analytics-method">DBSCAN · 100 m · 3 reports</span>
     </div>
     {error && <p className="analytics-error" role="alert">{error}</p>}
+    {analysisStatus && <p className="analytics-error" role="status">{analysisStatus}</p>}
     {!analytics && !error && <p className="analytics-loading">Loading analysis...</p>}
     {analytics && <>
       <div className="analytics-summary-grid">
@@ -98,9 +108,8 @@ export default function Analytics() {
       </div>
       <div className="analytics-content-grid">
         <article className={`analytics-panel analytics-map-panel ${mapExpanded ? 'analytics-map-expanded' : ''}`}>
-          <div className="analytics-panel-heading"><div><h2>Mzuzu SmartClean Waste Hotspot Map</h2><p>OpenStreetMap street data with live citizen reports and DBSCAN hotspots.</p></div><button className="analytics-map-expand" type="button" onClick={() => setMapExpanded((expanded) => !expanded)}>{mapExpanded ? 'Exit fullscreen' : 'Open fullscreen'}</button></div>
+          <div className="analytics-panel-heading"><div><h2>Mzuzu SmartClean Waste Hotspot Map</h2><p>Every report marker uses its original stored coordinate; DBSCAN hotspots are derived from those independent points.</p></div><button className="analytics-map-expand" type="button" onClick={() => setMapExpanded((expanded) => !expanded)}>{mapExpanded ? 'Exit fullscreen' : 'Open fullscreen'}</button></div>
           <div className="analytics-map-tools">
-            <label><input type="checkbox" checked={visibleLayers.boundary} onChange={(event) => setVisibleLayers({ ...visibleLayers, boundary: event.target.checked })} /> City boundary</label>
             <label><input type="checkbox" checked={visibleLayers.reports} onChange={(event) => setVisibleLayers({ ...visibleLayers, reports: event.target.checked })} /> Waste reports</label>
             <label><input type="checkbox" checked={visibleLayers.hotspots} onChange={(event) => setVisibleLayers({ ...visibleLayers, hotspots: event.target.checked })} /> DBSCAN hotspots</label>
             <label><input type="checkbox" checked={visibleLayers.noise} onChange={(event) => setVisibleLayers({ ...visibleLayers, noise: event.target.checked })} /> Isolated reports</label>
@@ -108,25 +117,23 @@ export default function Analytics() {
           <div className="analytics-map-shell">
           <MapContainer className="analytics-map" center={mapCenter} zoom={13} scrollWheelZoom>
             <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {visibleLayers.boundary && boundary && <GeoJSON data={boundary} style={{ color: '#ff0000', weight: 6, opacity: 1, fillColor: '#ffff00', fillOpacity: 0.08, lineCap: 'round', lineJoin: 'round' }} onEachFeature={(feature, layer) => { layer.bindTooltip('Mzuzu City Administrative Boundary', { sticky: true }); layer.on({ mouseover: () => layer.setStyle({ color: '#00ffff', weight: 9, fillOpacity: 0.15 }), mouseout: () => layer.setStyle({ color: '#ff0000', weight: 6, fillOpacity: 0.08 }) }) }} />}
-            {visibleLayers.reports && analytics.points.filter((point) => point.cluster !== -1).map((point) => <CircleMarker key={point.report_id} center={[point.latitude, point.longitude]} radius={7} pathOptions={{ color: '#15803d', weight: 2, fillColor: '#15803d', fillOpacity: 0.9 }}>
-              <Tooltip sticky>{point.location_description}</Tooltip>
-              <Popup><strong>Mzuzu SmartClean Waste Report</strong><br /><b>Submitted place:</b> {point.location_description}<br /><b>Report:</b> {point.public_reference}<br /><b>Category:</b> {point.category}<br /><b>DBSCAN cluster:</b> {point.cluster}<br /><b>Latitude:</b> {point.latitude.toFixed(6)}<br /><b>Longitude:</b> {point.longitude.toFixed(6)}</Popup>
-            </CircleMarker>)}
-            {visibleLayers.noise && analytics.points.filter((point) => point.cluster === -1).map((point) => <CircleMarker key={point.report_id} center={[point.latitude, point.longitude]} radius={6} pathOptions={{ color: point.boundary_status === 'outside' ? '#dc2626' : '#6b7280', weight: 2, fillColor: point.boundary_status === 'outside' ? '#dc2626' : '#6b7280', fillOpacity: 0.8 }}>
-              <Tooltip sticky>{point.location_description}</Tooltip>
-              <Popup><strong>{point.boundary_status === 'outside' ? 'Report outside Mzuzu boundary' : 'Isolated Waste Report'}</strong><br /><b>Submitted place:</b> {point.location_description}<br /><b>Report:</b> {point.public_reference}<br /><b>Category:</b> {point.category}<br /><b>DBSCAN:</b> Noise (-1)</Popup>
-            </CircleMarker>)}
+            {mapPoints.map((point) => {
+              const isNoise = point.cluster === -1
+              if ((isNoise && !visibleLayers.noise) || (!isNoise && !visibleLayers.reports)) return null
+              return <CircleMarker key={point.report_id} center={[point.latitude, point.longitude]} radius={isNoise ? 6 : 7} pathOptions={{ color: isNoise ? '#6b7280' : '#15803d', weight: 2, fillColor: isNoise ? '#6b7280' : '#15803d', fillOpacity: isNoise ? 0.8 : 0.9 }}>
+                <Tooltip permanent direction="top" offset={[0, -8]}>{point.location_description}</Tooltip>
+                <Popup><strong>{isNoise ? 'Isolated Waste Report' : 'Mzuzu SmartClean Waste Report'}</strong><br /><b>Submitted place:</b> {point.location_description}<br /><b>Report:</b> {point.public_reference}<br /><b>Category:</b> {point.category}<br /><b>DBSCAN:</b> {isNoise ? 'Noise (-1)' : `Cluster ${point.cluster}`}<br /><b>Latitude:</b> {point.latitude.toFixed(6)}<br /><b>Longitude:</b> {point.longitude.toFixed(6)}<br /><b>Recorded GPS accuracy:</b> {point.gps_accuracy_m == null ? 'Not available' : `${point.gps_accuracy_m.toFixed(0)} m`}</Popup>
+              </CircleMarker>
+            })}
             {visibleLayers.hotspots && analytics.hotspots.map((hotspot) => <Fragment key={`hotspot-${hotspot.cluster}`}>
-              <Circle center={[hotspot.average_latitude, hotspot.average_longitude]} radius={150} pathOptions={{ color: '#0066ff', weight: 3, fillColor: '#0066ff', fillOpacity: 0.08 }} />
               <CircleMarker center={[hotspot.average_latitude, hotspot.average_longitude]} radius={10} pathOptions={{ color: '#0066ff', weight: 3, fillColor: '#0066ff', fillOpacity: 0.95 }}>
                 <Tooltip sticky>{`DBSCAN Hotspot ${hotspot.cluster} - ${hotspot.number_of_reports} reports`}</Tooltip>
-                <Popup><strong>DBSCAN Waste Hotspot {hotspot.cluster}</strong><br /><b>Number of reports:</b> {hotspot.number_of_reports}<br /><b>Centre:</b> {hotspot.average_latitude.toFixed(6)}, {hotspot.average_longitude.toFixed(6)}<br /><b>Categories:</b> {Object.entries(hotspot.categories).map(([category, count]) => `${category}: ${count}`).join(', ')}</Popup>
+                <Popup><strong>DBSCAN Waste Hotspot {hotspot.cluster}</strong><br /><b>Number of independent reports:</b> {hotspot.number_of_reports}<br /><b>Derived visualization centre:</b> {hotspot.average_latitude.toFixed(6)}, {hotspot.average_longitude.toFixed(6)}<br /><b>Categories:</b> {Object.entries(hotspot.categories).map(([category, count]) => `${category}: ${count}`).join(', ')}</Popup>
               </CircleMarker>
             </Fragment>)}
-            <MapViewControls boundary={boundary} center={mapCenter} />
+            <MapViewControls center={mapCenter} points={mapPoints} />
           </MapContainer>
-          <div className="analytics-map-legend"><strong>MZUZU SMARTCLEAN</strong><b>Waste Hotspot Map</b><hr /><span><i className="legend-boundary" /> Mzuzu City Boundary</span><span><i className="legend-dot legend-green" /> Waste report inside boundary</span><span><i className="legend-dot legend-red" /> Waste report outside boundary</span><span><i className="legend-dot legend-blue" /> DBSCAN hotspot</span><span><i className="legend-dot legend-gray" /> Isolated / noise report</span><small>Street names: OpenStreetMap</small></div>
+          <div className="analytics-map-legend"><strong>SMARTCLEAN</strong><b>Waste Hotspot Map</b><hr /><span><i className="legend-dot legend-green" /> Clustered waste report</span><span><i className="legend-dot legend-blue" /> DBSCAN hotspot centre</span><span><i className="legend-dot legend-gray" /> Isolated report</span><small>Hotspots contain at least 3 reports within 100 m. No radius circle is displayed.</small></div>
           </div>
         </article>
       </div>

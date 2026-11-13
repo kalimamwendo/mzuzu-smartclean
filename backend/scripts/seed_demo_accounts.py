@@ -9,7 +9,7 @@ from app.security.auth import hash_password
 
 ACCOUNTS = [
     {
-        "display_name": "SmartClean Demo Citizen",
+        "display_name": "Citizen",
         "email": "citizen@smartclean.mw",
         "password": "CleanCity2026!",
         "role": UserRole.CITIZEN,

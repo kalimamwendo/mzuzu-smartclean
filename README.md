@@ -36,9 +36,9 @@ python -m pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-The working local setup uses `sqlite:///./smartclean.db`. The API creates its local tables and seeds categories at startup. Temporary development accounts are enabled in the local `.env`; public registration still creates citizen accounts only.
+The working local setup can continue using `sqlite:///./smartclean.db`. For PostgreSQL/PostGIS, set `DATABASE_URL` to a `postgresql+psycopg://...` connection string, ensure PostGIS is installed, and run `alembic upgrade head` from `backend/`. The application creates the PostGIS extension when it starts against PostgreSQL; the migration also adds and backfills the EPSG:4326 point column with a GiST index. Temporary development accounts are enabled in the local `.env`; public registration still creates citizen accounts only.
 
-Local development sign-in: citizen `citizen@smartclean.mw` / `CleanCity2026!`; administrator `admin@smartclean.mw` / `SmartCleanDemo26!`. These are development-only credentials. To use PostgreSQL later, change `DATABASE_URL` to your PostgreSQL connection string and install PostGIS for that PostgreSQL version before spatial migrations and analysis.
+Local development sign-in: citizen `citizen@smartclean.mw` / `CleanCity2026!`; administrator `admin@smartclean.mw` / `SmartCleanDemo26!`. These are development-only credentials. Never commit `backend/.env` or database passwords.
 
 Start the API:
 
@@ -72,7 +72,7 @@ From `backend/` with the virtual environment active:
 pytest
 ```
 
-The API currently runs against the configured local SQLite database. Spatial boundary checks and DBSCAN still require PostgreSQL with PostGIS and a verified boundary dataset.
+The API runs against the configured database. SQLite remains supported for local development; PostgreSQL uses Psycopg 3, connection pooling, and the PostGIS `location_geom` column while retaining the original latitude and longitude fields.
 
 ## Current limits and next steps
 
@@ -80,6 +80,7 @@ The API currently runs against the configured local SQLite database. Spatial bou
 - Staff accounts must be provisioned by a trusted database/admin process; public signup always creates a citizen.
 - Password recovery is not connected because no email delivery service is configured.
 - No verified boundary dataset has been provided. Reports remain explicitly marked boundary validation unavailable.
-- DBSCAN and model-run persistence will be added after report storage and real data are available.
+- DBSCAN uses scikit-learn Haversine distance with a 50 m / 4-sample default, supports all-report and unique-location modes, parameter tuning, duplicate flags, and persisted analysis runs.
+- Boundary-filtered analysis endpoints intentionally return a clear error until `BOUNDARY_VERIFIED=true` is set for a trusted study boundary; the existing GeoJSON is not assumed to be verified.
 - Current local runtime: API at `http://127.0.0.1:8000`, frontend at `http://localhost:5173`; `GET /api/v1/health/ready` reports the database as connected.
-- Next spatial step: install PostGIS, set PostgreSQL credentials, add a spatial migration, and then implement verified-boundary validation and DBSCAN.
+- Next spatial step: install PostGIS and import only a verified boundary dataset before enabling boundary validation.

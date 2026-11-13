@@ -1,0 +1,15 @@
+.collection-route-page { display: grid; gap: 20px; }
+.collection-route-heading { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; }
+.collection-route-eyebrow { color: #15803d; font-size: 11px; font-weight: 800; letter-spacing: .12em; margin: 0 0 6px; }
+.collection-route-heading h1 { margin: 0; }
+.collection-route-heading p { color: #64748b; margin: 8px 0 0; }
+.collection-route-heading button { display: inline-flex; gap: 8px; align-items: center; border: 0; border-radius: 10px; padding: 11px 14px; color: #fff; background: #15803d; cursor: pointer; }
+.collection-route-heading button:disabled { opacity: .6; cursor: wait; }
+.collection-route-summary { display: flex; gap: 18px; align-items: baseline; flex-wrap: wrap; padding: 16px; border: 1px solid #dbeafe; border-radius: 12px; background: #f8fafc; }
+.collection-route-summary strong { font-size: 22px; color: #166534; }
+.collection-route-summary small { color: #64748b; width: 100%; }
+.collection-route-error { color: #b91c1c; }
+.collection-route-list { display: grid; gap: 8px; }
+.collection-route-list article { display: flex; gap: 12px; align-items: center; padding: 11px 14px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; }
+.collection-route-list article > span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #fff; background: #15803d; font-weight: 800; }
+.collection-route-list small { display: block; color: #64748b; margin-top: 3px; }

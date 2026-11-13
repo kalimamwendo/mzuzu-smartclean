@@ -1,6 +1,6 @@
 ﻿from fastapi import APIRouter
 
-from app.api.routes import admin_reports, admin_users, analytics, auth, categories, health, reports
+from app.api.routes import admin_reports, admin_users, analytics, auth, categories, health, reports, routing, spatial
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(health.router)
@@ -10,3 +10,5 @@ api_router.include_router(reports.router)
 api_router.include_router(admin_reports.router)
 api_router.include_router(analytics.router)
 api_router.include_router(admin_users.router)
+api_router.include_router(spatial.router)
+api_router.include_router(routing.router)

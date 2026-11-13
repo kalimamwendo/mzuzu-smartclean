@@ -13,7 +13,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-        op.create_table(
+    op.create_table(
         "users",
         sa.Column("id", sa.Uuid(as_uuid=True), primary_key=True),
         sa.Column("display_name", sa.String(120), nullable=False),

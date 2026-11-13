@@ -20,7 +20,11 @@ class ReportCreate(BaseModel):
     location_description: str = Field(min_length=2, max_length=300)
     latitude: float = Field(ge=-90, le=90)
     longitude: float = Field(ge=-180, le=180)
+    gps_capture_latitude: float | None = Field(default=None, ge=-90, le=90)
+    gps_capture_longitude: float | None = Field(default=None, ge=-180, le=180)
+    gps_captured_at: datetime | None = None
     gps_accuracy_m: float | None = Field(default=None, ge=0, le=100000)
+    manually_adjusted: bool = False
     photo_reference: str | None = Field(default=None, max_length=500)
     photo_data_url: str | None = Field(default=None, max_length=7_000_000)
 
@@ -55,7 +59,11 @@ class ReportAdminOut(BaseModel):
     location_description: str
     latitude: float
     longitude: float
+    gps_capture_latitude: float | None
+    gps_capture_longitude: float | None
+    gps_captured_at: datetime | None
     gps_accuracy_m: float | None
+    manually_adjusted: bool
     review_status: str
     boundary_status: str
     reported_at: datetime

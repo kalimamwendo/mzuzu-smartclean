@@ -4,7 +4,9 @@
 .app-toast button:hover { background: #f0fdf4; }
 .app-toast-error { border-color: #fecaca; color: #991b1b; }
 .app-toast-success { border-color: #bbf7d0; color: #166534; }
+.app-toast-info { border-color: #bfdbfe; color: #1d4ed8; }
 :root[data-theme='dark'] .app-toast { background: #111a14; border-color: #334a39; color: #d7f0dc; }
 :root[data-theme='dark'] .app-toast-error { border-color: #7f1d1d; color: #fecaca; }
+:root[data-theme='dark'] .app-toast-info { border-color: #1e40af; color: #bfdbfe; }
 @keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 560px) { .app-toast { top: 10px; right: 10px; width: calc(100vw - 20px); } }

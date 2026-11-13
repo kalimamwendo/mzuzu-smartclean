@@ -9,15 +9,16 @@ import {
   LayoutDashboard,
   ClipboardList,
   ChartNoAxesCombined,
-  UserRound,
   Menu,
   X,
   LogOut,
   Bell,
-  ChevronRight,
   Users,
+  Route,
+  ChevronDown,
 } from 'lucide-react'
 import Toast from '../components/Toast'
+import smartCleanLogo from '../images/log.jpeg'
 import './AdminLayout.css'
 
 function AdminLayout() {
@@ -25,6 +26,9 @@ function AdminLayout() {
   const { signOut, user } = useAuth()
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [logoutPrompt, setLogoutPrompt] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [toast, setToast] = useState(null)
   const dismissToast = useCallback(() => setToast(null), [])
 
@@ -51,11 +55,7 @@ function AdminLayout() {
       path: '/admin/analytics',
       icon: ChartNoAxesCombined,
     },
-    {
-      label: 'My Profile',
-      path: '/admin/profile',
-      icon: UserRound,
-    },
+    { label: 'Collection Route', path: '/admin/collection-route', icon: Route },
     { label: 'Manage Users', path: '/admin/users', icon: Users },
   ]
 
@@ -72,9 +72,7 @@ function AdminLayout() {
 
       <aside className={`admin-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-brand">
-          <div className="sidebar-logo">
-            <Leaf size={26} />
-          </div>
+          <div className="sidebar-logo"><img src={smartCleanLogo} alt="" /></div>
 
           <div className="sidebar-brand-text">
             <h2>SmartClean</h2>
@@ -108,9 +106,6 @@ function AdminLayout() {
               >
                 <Icon size={19} />
                 <span>{item.label}</span>
-                {item.path === '/admin' && (
-                  <ChevronRight size={16} className="sidebar-chevron" />
-                )}
               </NavLink>
             )
           })}
@@ -125,13 +120,6 @@ function AdminLayout() {
             </div>
           </div>
 
-          <button
-            className="sidebar-logout"
-            onClick={() => { signOut(); navigate('/') }}
-          >
-            <LogOut size={18} />
-            <span>Sign out</span>
-          </button>
         </div>
       </aside>
 
@@ -157,32 +145,86 @@ function AdminLayout() {
               className="notification-button"
               aria-label="Notifications"
               title="Notifications"
-              onClick={() => setToast({ type: 'info', message: 'You are all caught up. New account and report alerts will appear here.' })}
+              aria-expanded={notificationsOpen}
+              onClick={() => setNotificationsOpen((open) => !open)}
             >
               <Bell size={19} />
             </button>
+            {notificationsOpen && (
+              <div className="admin-notification-popover" role="status">
+                <strong>Notifications</strong>
+                <p>You are all caught up. New account and report alerts will appear here.</p>
+              </div>
+            )}
 
             <div className="topbar-divider" />
 
-            <div className="admin-identity">
-              <div className="admin-avatar">{admin.initials}</div>
+            <div className="admin-profile-menu">
               <button
-  type="button"
-  className="theme-toggle"
-  onClick={toggleTheme}
-  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-  title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
->
-  {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
-  <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
-</button>
-              <div className="admin-identity-text">
-                <strong>{user?.name || admin.name}</strong>
-                <span>{admin.role}</span>
-              </div>
+                type="button"
+                className="admin-identity"
+                onClick={() => setProfileOpen((open) => !open)}
+                aria-expanded={profileOpen}
+                aria-haspopup="menu"
+              >
+                <div className="admin-avatar">{admin.initials}</div>
+                <div className="admin-identity-text">
+                  <strong>{user?.name || admin.name}</strong>
+                  <span>{admin.role}</span>
+                </div>
+                <ChevronDown size={16} className={profileOpen ? 'profile-chevron profile-chevron-open' : 'profile-chevron'} />
+              </button>
+              {profileOpen && (
+                <div className="admin-profile-dropdown" role="menu">
+                  <div className="profile-dropdown-header">
+                    <div className="admin-avatar">{admin.initials}</div>
+                    <div>
+                      <strong>{user?.name || admin.name}</strong>
+                      <span>{user?.email || 'Administrator account'}</span>
+                    </div>
+                  </div>
+                  <div className="profile-dropdown-details">
+                    <span>Role</span>
+                    <strong>{admin.role}</strong>
+                    <span>Account status</span>
+                    <strong>{user?.accountStatus || 'Active'}</strong>
+                  </div>
+                  <button
+                    type="button"
+                    className="profile-dropdown-action"
+                    onClick={toggleTheme}
+                    role="menuitem"
+                  >
+                    {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+                    {theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  </button>
+                  <button
+                    type="button"
+                    className="profile-dropdown-action profile-dropdown-logout"
+                    onClick={() => setLogoutPrompt(true)}
+                    role="menuitem"
+                  >
+                    <LogOut size={17} />
+                    Sign out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
+
+        {logoutPrompt && (
+          <div className="logout-dialog-backdrop" role="presentation">
+            <div className="logout-dialog" role="alertdialog" aria-modal="true" aria-labelledby="logout-dialog-title">
+              <h2 id="logout-dialog-title">Sign out of SmartClean?</h2>
+              <p>You will need to sign in again to access the administrator workspace.</p>
+              <div className="logout-dialog-actions">
+                <button type="button" className="logout-cancel" onClick={() => setLogoutPrompt(false)}>Cancel</button>
+                <button type="button" className="logout-confirm" onClick={() => { signOut(); navigate('/') }}>Sign out</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <main className="admin-page-content">
           <Outlet />

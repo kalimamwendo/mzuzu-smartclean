@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
 from app.api.router import api_router
 from app.core.config import settings
@@ -15,6 +16,9 @@ def _initialize_database() -> None:
     """Create tables and seed initial data if the database is configured."""
     if SessionLocal is None or engine is None:
         return
+    if engine.dialect.name == "postgresql":
+        with engine.begin() as connection:
+            connection.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
     Base.metadata.create_all(bind=engine)
     from scripts.seed_categories import seed_categories
     seed_categories()

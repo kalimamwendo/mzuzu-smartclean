@@ -6,6 +6,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
+from geoalchemy2.elements import WKTElement
 
 from app.db.session import get_db
 from app.models import ReportStatusHistory, User, WasteCategory, WasteReport
@@ -67,6 +68,12 @@ def create_report(
 
     if not photo_reference:
         raise HTTPException(status_code=422, detail="A photo is required for each waste report.")
+    if payload.gps_accuracy_m is None:
+        raise HTTPException(status_code=422, detail="A GPS accuracy reading is required.")
+    if not payload.manually_adjusted and (
+        payload.latitude != payload.gps_capture_latitude or payload.longitude != payload.gps_capture_longitude
+    ):
+        raise HTTPException(status_code=422, detail="Coordinates must match the captured GPS fix unless manually adjusted.")
 
     report = WasteReport(
         public_reference=make_public_reference(),
@@ -76,7 +83,16 @@ def create_report(
         location_description=payload.location_description,
         latitude=payload.latitude,
         longitude=payload.longitude,
+        gps_capture_latitude=payload.gps_capture_latitude,
+        gps_capture_longitude=payload.gps_capture_longitude,
+        gps_captured_at=payload.gps_captured_at,
+        manually_adjusted=payload.manually_adjusted,
         location=f"POINT({payload.longitude} {payload.latitude})",
+        location_geom=(
+            WKTElement(f"POINT({payload.longitude} {payload.latitude})", srid=4326)
+            if db.bind is not None and db.bind.dialect.name == "postgresql"
+            else None
+        ),
         gps_accuracy_m=payload.gps_accuracy_m,
         photo_reference=photo_reference,
         review_status="submitted",

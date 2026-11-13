@@ -6,6 +6,12 @@ class Settings(BaseSettings):
     app_name: str = "Mzuzu SmartClean API"
     app_env: str = "development"
     database_url: str = "sqlite:///./smartclean.db"
+    db_pool_size: int = 5
+    db_max_overflow: int = 10
+    db_pool_timeout: int = 30
+    db_pool_recycle: int = 1800
+    boundary_geojson_path: str = "data/mzuzu_boundary.geojson"
+    boundary_verified: bool = False
     cors_origins: list[str] = ["http://localhost:5173"]
 
     @field_validator("cors_origins", mode="before")

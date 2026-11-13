@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Building2, CheckCircle2, Leaf, LockKeyhole, MapPin, Moon, Recycle, Sun, UserPlus } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Building2, CheckCircle2, Leaf, LockKeyhole, MapPin, Recycle, UserPlus } from 'lucide-react'
 import { useAuth } from './AuthContext'
-import { useTheme } from './ThemeContext'
 import mzuzuCityImage from './images/Screenshot 2026-10-21 100433.png'
+import smartCleanLogo from './images/log.jpeg'
 import './LandingPage.css'
 
 export default function LandingPage() {
@@ -11,10 +11,10 @@ export default function LandingPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const { user, signIn, signUp, requestPasswordReset } = useAuth()
-  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
   if (user) return <Navigate to={user.role === 'admin' ? '/admin' : '/citizen'} replace />
@@ -38,6 +38,10 @@ export default function LandingPage() {
 
   async function handleSignUp(event) {
     event.preventDefault()
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.')
+      return
+    }
     const result = await signUp({ name, email, password })
     if (result.error || !result.user) {
       setError(result.error || 'Sign up failed. Could not retrieve user profile.')
@@ -63,15 +67,12 @@ export default function LandingPage() {
     <div className="landing-page">
       <header className="landing-header">
         <a className="landing-brand" href="/" aria-label="Mzuzu SmartClean home">
-          <span className="landing-brand-icon"><Leaf size={23} /></span>
+          <span className="landing-brand-icon"><img src={smartCleanLogo} alt="" /></span>
           <span><strong>Mzuzu SmartClean</strong><small>Cleaner communities, healthier lives</small></span>
         </a>
         <nav className="landing-nav" aria-label="Main navigation">
           <a href="#about">About the city</a>
           <a href="#how-it-works">How it works</a>
-          <button type="button" className="landing-theme-toggle" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
-            {theme === 'dark' ? <><Sun size={15} /> Light mode</> : <><Moon size={15} /> Dark mode</>}
-          </button>
         </nav>
       </header>
 
@@ -104,7 +105,7 @@ export default function LandingPage() {
                 <input id="signin-email" type="email" autoComplete="username" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
                 {error && <p className="signin-error" role="alert">{error}</p>}
                 <button className="signin-submit" type="submit">Continue with email <ArrowRight size={17} /></button>
-                <p className="signin-switch">New to SmartClean? <button type="button" onClick={() => openMode('signup')}>Sign up</button></p>
+                <button className="signin-signup-button" type="button" onClick={() => openMode('signup')}>Sign up</button>
               </form>
             )}
 
@@ -128,6 +129,8 @@ export default function LandingPage() {
                 <input id="signup-email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
                 <label htmlFor="signup-password">Create a password</label>
                 <input id="signup-password" type="password" autoComplete="new-password" placeholder="Choose a password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} required />
+                <label htmlFor="signup-confirm-password">Confirm password</label>
+                <input id="signup-confirm-password" type="password" autoComplete="new-password" placeholder="Re-enter your password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} minLength={8} required />
                 {error && <p className="signin-error" role="alert">{error}</p>}
                 <button className="signin-submit" type="submit">Create account <ArrowRight size={17} /></button>
                 <p className="signin-switch">Already have an account? <button type="button" onClick={() => openMode('email')}>Continue with email</button></p>
@@ -145,7 +148,6 @@ export default function LandingPage() {
               </form>
             )}
 
-            <p className="signin-demo-note">Sign-in is securely checked by the SmartClean service. Staff accounts are provisioned by an administrator.</p>
           </section>
         </section>
 
@@ -183,7 +185,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="landing-footer">
-        <a className="landing-brand footer-brand" href="/"><span className="landing-brand-icon"><Leaf size={21} /></span><span><strong>Mzuzu SmartClean</strong><small>Cleaner communities, healthier lives</small></span></a>
+        <a className="landing-brand footer-brand" href="/"><span className="landing-brand-icon"><img src={smartCleanLogo} alt="" /></span><span><strong>Mzuzu SmartClean</strong><small>Cleaner communities, healthier lives</small></span></a>
         <p>A community waste reporting project for Mzuzu City, Malawi.</p>
         <a href="#about">Learn about the project ↑</a>
       </footer>

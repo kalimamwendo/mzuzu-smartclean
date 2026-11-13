@@ -3,6 +3,7 @@
 .landing-header { border-bottom: 1px solid #e5ebe5; }
 .landing-brand { display: inline-flex; align-items: center; gap: 11px; color: #174d2b; text-decoration: none; }
 .landing-brand-icon { display: grid; place-items: center; width: 43px; height: 43px; border-radius: 13px; background: #16803c; color: #fff; }
+.landing-brand-icon img { width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: inherit; }
 .landing-brand strong, .landing-brand small { display: block; }
 .landing-brand strong { font-size: 16px; }
 .landing-brand small { margin-top: 4px; color: #748078; font-size: 10px; }
@@ -31,6 +32,8 @@
 .signin-form input:focus { outline: 3px solid rgba(22,128,60,.13); border-color: #16803c; }
 .signin-submit { display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 19px; border: 0; border-radius: 9px; padding: 13px; background: #16803c; color: #fff; font-size: 13px; font-weight: 750; }
 .signin-submit:hover { background: #126331; }
+.signin-signup-button { display: block; width: 100%; margin-top: 12px; padding: 12px; border: 1px solid #bbf7d0; border-radius: 9px; color: #166534; background: #f0fdf4; font-size: 13px; font-weight: 750; cursor: pointer; }
+.signin-signup-button:hover { background: #dcfce7; }
 .signin-demo-note { margin: 15px 0 0; color: #7b867e; font-size: 10px; line-height: 1.6; }
 .signin-error { color: #b42318; font-size: 12px; }
 .landing-stats { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 1136px; margin: 0 auto; border-top: 1px solid #e1e8e1; border-bottom: 1px solid #e1e8e1; }

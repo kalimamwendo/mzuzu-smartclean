@@ -8,6 +8,7 @@ class AnalyticsPoint(BaseModel):
     boundary_status: str
     latitude: float
     longitude: float
+    gps_accuracy_m: float | None
     category: str
     cluster: int
 

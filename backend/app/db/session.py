@@ -24,7 +24,17 @@ def make_session_factory():
         if "replace-me" in (url.password or "") or settings.secret_key.startswith("development-only-"):
             return None
         global engine
-        engine = create_engine(url, pool_pre_ping=True)
+        engine_kwargs = {"pool_pre_ping": True}
+        if url.drivername.startswith("sqlite"):
+            engine_kwargs["connect_args"] = {"check_same_thread": False}
+        else:
+            engine_kwargs.update(
+                pool_size=settings.db_pool_size,
+                max_overflow=settings.db_max_overflow,
+                pool_timeout=settings.db_pool_timeout,
+                pool_recycle=settings.db_pool_recycle,
+            )
+        engine = create_engine(url, **engine_kwargs)
         return sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
     except (ImportError, ModuleNotFoundError, ValueError):
         return None

@@ -9,6 +9,7 @@ import Reports from './admin/Reports.jsx'
 import Analytics from './admin/Analytics.jsx'
 import Profile from './admin/Profile.jsx'
 import ManageUsers from './admin/ManageUsers.jsx'
+import CollectionRoute from './admin/CollectionRoute.jsx'
 
 function RequireRole({ role, children }) {
   const { user } = useAuth()
@@ -27,6 +28,7 @@ export default function App() {
               <Route index element={<AdminDashboard />} />
               <Route path="reports" element={<Reports />} />
               <Route path="analytics" element={<Analytics />} />
+              <Route path="collection-route" element={<CollectionRoute />} />
               <Route path="profile" element={<Profile />} />
               <Route path="users" element={<ManageUsers />} />
             </Route>
